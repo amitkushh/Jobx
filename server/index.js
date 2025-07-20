@@ -2,9 +2,10 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import connectDb from "./db/mongoose.js"
+import connectDb from "./db/mongoose.js";
 
 //Import Routes
+import userRoutes from "./routes/user.routes.js";
 
 dotenv.config();
 const app = express();
@@ -24,13 +25,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 //Database Connection
-connectDb()
+connectDb();
 
 app.get("/", (req, res) => {
   res.send("API IS WORKING");
 });
 
 //Custom Apies
+app.use("/api/v1/users", userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
