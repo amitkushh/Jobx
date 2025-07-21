@@ -36,6 +36,7 @@ export const register = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: "User created Successfully",
+      user,
     });
   } catch (error) {
     console.log("Error in registring user", error);
@@ -67,8 +68,8 @@ export const login = async (req, res) => {
     }
 
     const isPasswordMatch = await bcrypt.compare(
-      existingUser.password,
-      password
+      password,
+      existingUser.password
     );
 
     if (!isPasswordMatch) {
@@ -87,7 +88,7 @@ export const login = async (req, res) => {
     }
 
     const tokenData = {
-      userId: user._id,
+      userId: existingUser._id,
     };
 
     const token = await jwt.sign(tokenData, process.env.JWT_SECRET, {
@@ -95,12 +96,12 @@ export const login = async (req, res) => {
     });
 
     const user = {
-      _id: user._id,
-      fullname: user.fullname,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      role: user.role,
-      profile: user.profile,
+      _id: existingUser._id,
+      fullname: existingUser.fullname,
+      email: existingUser.email,
+      phoneNumber: existingUser.phoneNumber,
+      role: existingUser.role,
+      profile: existingUser.profile,
     };
 
     return res
@@ -144,19 +145,16 @@ export const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     const file = req.file;
 
-    if (!fullname || !email || !phoneNumber || !bio || !skills) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required",
-      });
-    }
-
     //cloudnary file setup
 
-    const skillsArray = skills.split(",");
+    let skillsArray;
+    if (skills) {
+      skillsArray = skills.split(",");
+    }
+
     const userId = req.id; // comming from auth middleware
 
-    const user = await User.findById(userId);
+    let user = await User.findById(userId);
 
     if (!user) {
       return res.status(400).json({
@@ -165,26 +163,27 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    (user.fullname = fullname),
-      (user.email = email),
-      (user.phoneNumber = phoneNumber),
-      (user.profile.bio = bio);
-    user.profile.skills = skillsArray;
+    if (fullname) user.fullname = fullname;
+    if (email) user.email = email;
+    if (phoneNumber) user.phoneNumber = phoneNumber;
+    if (bio) user.profile.bio = bio;
+    if (skills) user.profile.skills = skillsArray;
 
     await user.save();
 
-    const newUser = {
-      id: newUser._id,
-      fullname: newUser.fullname,
-      email: newUser.email,
-      phoneNumber: newUser.phoneNumber,
-      role: newUser.role,
-      profile: newUser.profile,
+    user = {
+      id: user._id,
+      fullname: user.fullname,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      role: user.role,
+      profile: user.profile,
     };
 
     return res.status(200).json({
       success: true,
       message: "Profile updated Successfully",
+      user,
     });
   } catch (error) {
     console.log("Error in update profile", error);

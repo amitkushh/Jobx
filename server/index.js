@@ -6,6 +6,7 @@ import connectDb from "./db/mongoose.js";
 
 //Import Routes
 import userRoutes from "./routes/user.routes.js";
+import companyRoutes from "./routes/company.routes.js";
 
 dotenv.config();
 const app = express();
@@ -33,6 +34,7 @@ app.get("/", (req, res) => {
 
 //Custom Apies
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/company", companyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
