@@ -36,12 +36,12 @@ export const postJob = async (req, res) => {
     const job = await Job.create({
       title,
       description,
-      requirements: requirements.splite(","),
+      requirements: requirements.split(","),
       salary: Number(salary),
       exprienceLevel: exprience,
       location,
       jobType,
-      postion,
+      position,
       company: companyId,
       created_by: userId,
     });
@@ -72,7 +72,11 @@ export const getAllJobs = async (req, res) => {
       ],
     };
 
-    const jobs = await Job.find(query);
+    const jobs = await Job.find(query)
+      .populate({
+        path: "company",
+      })
+      .sort({ createdAt: -1 });
 
     if (!jobs) {
       return res.status(404).json({
@@ -99,7 +103,11 @@ export const getJobById = async (req, res) => {
   try {
     const jobId = req.params.id;
 
-    const job = await Job.findById(jobId);
+    const job = await Job.findById(jobId)
+      .populate({
+        path: "Company",
+      })
+      .sort({ createdAt: -1 });
 
     if (!job) {
       return res.status(404).json({
@@ -121,6 +129,7 @@ export const getJobById = async (req, res) => {
   }
 };
 
+//using populate you can access all information about the company
 //For Admin:= How many jobs created by admin
 export const getAdminJobs = async (req, res) => {
   try {
@@ -146,4 +155,3 @@ export const getAdminJobs = async (req, res) => {
     });
   }
 };
-
